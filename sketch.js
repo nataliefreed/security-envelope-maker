@@ -79,15 +79,28 @@ var envelopeSketch = function(p) {
 
 var menuSketch = function(p) {
   var colorGrid;
-  var blockColor = 0;
+  var blockColor;
+  var instructions;
+  var small = 20;
+  var medium = 50;
+  var large = 80;
+
+  p.preload = function() {
+    instructions = p.loadImage("envelope maker instructions.png");
+  }
 
   p.setup = function() {
-    p.createCanvas(120, 612);
+    p.createCanvas(360, 612);
     colorGrid = ['#f40c46', '#f97b04', '#ffee00', '#00ff6e', '#069b41', '#00ffe9', '#00cbff', '#0087ff', '#003bff', '#5900ff', '#c300ff', '#ff00c3', '#ffffff', '#c4c4c4', '#919191', '#000000'];
+    blockColor = p.color(0);
   }
 
   p.draw = function() {
     p.background(175);
+    p.fill(255);
+    p.noStroke();
+    p.rect(120, 0, 250, 612);
+    p.image(instructions, 160, 10, instructions.width * 0.5, instructions.height * 0.5);
 
     renderDrawingGrid(drawingGrid, 10, 10, 10, 10);
 
@@ -113,13 +126,13 @@ var menuSketch = function(p) {
     p.textSize(20);
     p.textAlign(p.CENTER, p.CENTER);
 
-    //clear button
-    p.fill(255);
+    //random button
+    p.fill(blockColor);
     p.stroke(0);
     p.rect(10, 240, 100, 30);
-    p.fill(0);
+    p.fill(255);
     p.noStroke();
-    p.text("clear", 10, 240, 100, 30);
+    p.text("random", 10, 240, 100, 30);
 
     //small, medium, large buttons
     p.push();
@@ -131,21 +144,42 @@ var menuSketch = function(p) {
     p.pop();
     p.fill(200);
     p.stroke(0);
+    
+    p.push(); //small
+    if (size == small) {
+      p.fill(150);
+    }
     p.rect(10, 310, 100, 30);
+    p.pop();
+    
+    p.push(); //medium
+    if (size == medium) {
+      p.fill(150);
+    }
     p.rect(10, 350, 100, 30);
+    p.pop();
+
+    p.push(); //large
+    if (size == large) {
+      p.fill(150);
+    }
     p.rect(10, 390, 100, 30);
+    p.pop();
+
     p.fill(0);
     p.noStroke();
     p.text("small", 10, 310, 100, 30);
     p.text("medium", 10, 350, 100, 30);
     p.text("large", 10, 390, 100, 30);
-    
-    p.push();
-    p.textSize(12);
-    p.textAlign(p.LEFT, p.TOP);
-    p.text("Right-click on template, choose Save As. Print at 51% scale for a #9 envelope. Use dotted lines to guide folds, then cut along solid lines. Apply glue to blank areas.", 10, 440, 100, 150);
-    p.pop();
-  
+
+    //clear button
+    p.fill(255);
+    p.stroke(0);
+    p.rect(10, 440, 100, 30);
+    p.fill(0);
+    p.noStroke();
+    p.text("clear", 10, 440, 100, 30);
+
     p.noLoop();
   }
 
@@ -154,20 +188,36 @@ var menuSketch = function(p) {
       if (p.mouseY > 10 && p.mouseY < 110) {
         var x = Math.floor(p.mouseX / 10) - 1;
         var y = Math.floor(p.mouseY / 10) - 1;
-        drawingGrid[x][y] = blockColor;
+        if (drawingGrid[x][y] == blockColor) { //if we are clicking on the same color
+          drawingGrid[x][y] = 255;
+        } else {
+          drawingGrid[x][y] = blockColor;
+        }
       } else if (p.mouseY > 120 && p.mouseY < 220) {
         blockColor = p.color(p.get(p.mouseX, p.mouseY));
       } else if (p.mouseY > 240 && p.mouseY < 270) { //clear button
-        clearGrid();
+        randomize();
       } else if (p.mouseY > 310 && p.mouseY < 340) { //small button
-        size = 20;
+        size = small;
       } else if (p.mouseY > 350 && p.mouseY < 380) { //medium button
-        size = 50;
+        size = medium;
       } else if (p.mouseY > 390 && p.mouseY < 420) { //large button
-        size = 80;
+        size = large;
+      } else if (p.mouseY > 440 && p.mouseY < 470) {
+        clearGrid();
       }
       envelope.loop();
       p.loop();
+    }
+  }
+
+  randomize = function() {
+    //randomize grid
+    clearGrid();
+    for (var i = 0; i < 10; i++) {
+      for (var j = 0; j < 10; j++) {
+        drawingGrid[i][j] = Math.random() > 0.5 ? blockColor : 255;
+      }
     }
   }
 
